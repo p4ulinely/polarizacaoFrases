@@ -1,6 +1,6 @@
 
 #funcao que polariza a frase
-private def polarizarFrase(frase, lemas)
+private def polarizarFrase(frase, lemas, tipo=1)
 
 	#tokenizar a frase num array de tokens
 	vetTokens = tokenizeFrase(frase)
@@ -16,28 +16,45 @@ private def polarizarFrase(frase, lemas)
 	vetTokens.each_index do |idx|
 
 		#procura se o token e' valido (se existe no vetor de flexoes)
-		tokenValido = procurarLema(lemas, vetTokens[idx])
-
-		if tokenValido.length > 0
-			tokenValido.each do |idxToken|
-				print "#{lemas[idxToken]}\n"
+		if tipo == 1 # SentiLexPT2
+			arrTokenValido = procurarLema(lemas, vetTokens[idx])
+		else # OntoPT
+			arrTokenValido = procurarLema(lemas, vetTokens[idx], 2)
+		end
+		
+		# apenas se houver tokens validos
+		if arrTokenValido.length > 0
+			arrTokenValido.each do |idxToken| # arrTokenValido eh um array de indexs (numeros inteiros)
 	 
-				rotulo1 = lemas[idxToken][2]
-				rotulo2 = lemas[idxToken][3]
+	 			if tipo == 1 # SentiLexPT2
+					rotulo1 = lemas[idxToken][2]
+					rotulo2 = lemas[idxToken][3]
 
-				if rotulo1 == "-1" || rotulo2 == "-1"
-					tokensNeg += 1
-				end
-				if rotulo1 == "0" || rotulo2 == "0"
-					tokensNeu += 1
-				end
-				if rotulo1 == "1" || rotulo2 == "1"
-					tokensPos += 1
-				end
+					if rotulo1 == "-1" || rotulo2 == "-1"
+						tokensNeg += 1
+					elsif rotulo1 == "0" || rotulo2 == "0"
+						tokensNeu += 1
+					elsif rotulo1 == "1" || rotulo2 == "1"
+						tokensPos += 1
+					end
 
-				tokensValidos += 1				
+					tokensValidos += 1	
+	 			
+	 			else # OntoPT
+	 				rotulo1 = lemas[idxToken][lemas[idxToken].length-1]
+					
+					if rotulo1 == "-1"
+						tokensNeg += 1
+					elsif rotulo1 == "0"
+						tokensNeu += 1
+					elsif rotulo1 == "1"
+						tokensPos += 1
+					end
+
+					tokensValidos += 1	
+	 			end # if tipo
 			end # each
-		end # if
+		end # if validos
 	end #each_index
 
 	#caso nenhum token seja encontrado
@@ -170,13 +187,12 @@ private def tokenizeFrase(frase)
 	fraseTemp = fraseTemp.split()
 
 	# print fraseTemp
-	# puts
 	
 	return fraseTemp
 end #tokenizeFrase()
 
 #funcao que retorna os indexs do lema no vetor de lemas ou vazio caso nao exista
-private def procurarLema(vetLemasFlex, lemaTweet, inicio = 0, fim = 1)
+private def procurarLema(vetLemasFlex, lemaTweet, tipo=1)
 	# o array eh desta forma Array(lemas, polarizacao1, polarizacao2)
 	# SentiLex-PT2 tem apenas dois lemas, mas o Onto-PT tem muitos lemas
 	
@@ -186,9 +202,16 @@ private def procurarLema(vetLemasFlex, lemaTweet, inicio = 0, fim = 1)
 	# itera no array inteiro (pois pode haver o lema mais de uma vez)
 	vetLemasFlex.each_index do |i|
 
+		if tipo == 1 # SentiLexPT2
+			fim = 1
+		else # OntoPT
+			fim = vetLemasFlex[i].length-2 # elimina o ultimo elemento (polarizacao)
+		end
+
 		# itera apenas no range de lemas a procura/comparando com o lema da frase
-		(inicio..fim).each do |tokenLema|
+		(0..fim).each do |tokenLema|
 			if vetLemasFlex[i][tokenLema] == lemaTweet
+				fim = vetLemasFlex[i].length-2 # elimina o ultimo elemento (polarizacao)
 				idxLema.push(i)
 				break # evita a duplicacao de lemas agrupados com a mesma polarizacao
 			end
@@ -196,60 +219,93 @@ private def procurarLema(vetLemasFlex, lemaTweet, inicio = 0, fim = 1)
 	end
 
 	return idxLema
-	# return vetLemasFlex.find_index{ |meuLema| meuLema[0] == lema || meuLema[1] == lema}
 end # procurarLema()
 
 # metodo para ler o arquivos de polarizacao de sentimentos
 # retorna Array(lemas, polarizacao1, polarizacao2)
-private def lerAqruivoPolarizacao(src)
+private def lerAqruivoPolarizacao(src, tipo=1)
 
 	#arquivoExterno = File.open(src, "r", :encoding => 'utf-8')
 	arquivoExterno = File.open(src, "r")
 
-	arquivoSentiLexFlex = []
-	controle = 0
+	arquivoPolarizacoes = []
 
 	while linha = arquivoExterno.gets
+		
 		temp = ""
 		linha = linha.chop
 		linha = linha.force_encoding('utf-8')
-		pol1, pol2 = "nil", "nil"
 
-		#separa o lema de seus atributos
-		linha = linha.split(".")
+		#SentiLexPT2
+		if tipo == 1
+			pol1, pol2 = "nil", "nil"
 
-		#separa as flexoes
-		temp2 = linha[0].split(",")
+			#separa o lema de seus atributos
+			linha = linha.split(".")
 
-		#concatena as flexoes
-		temp += "#{temp2[0]};#{temp2[1]};"
+			#separa as flexoes
+			temp2 = linha[0].split(",")
 
-		#separa os atributos (4 atributos)
-		linha = linha[1].split(";")
+			#concatena as flexoes
+			temp += "#{temp2[0]};#{temp2[1]};"
 
-		# verifica qual das strings do array tem 'POL', e armazena as polariacoes em pol1 e pol2
-		linha.each do |i|
-			if i.include?("POL")
-				pol1 == "nil" ? pol1 = i.split("=")[1] : pol2 = i.split("=")[1]
+			#separa os atributos (4 atributos)
+			linha = linha[1].split(";")
+
+			# verifica qual das strings do array tem 'POL', e armazena as polariacoes em pol1 e pol2
+			linha.each do |i|
+				if i.include?("POL")
+					pol1 == "nil" ? pol1 = i.split("=")[1] : pol2 = i.split("=")[1]
+				end
 			end
-		end
 
-		temp += "#{pol1};#{pol2}"
+			temp += "#{pol1};#{pol2}"
 
+		#Onto-PT
+		elsif tipo == 2
+
+			linha = linha.split(":")
+
+			#elimina [
+			linha[2] = linha[2].gsub(/\[/, '')
+
+			#elimina ]
+			linha[2] = linha[2].gsub(/\]/, '')
+
+			#elimina espaços
+			linha[2] = linha[2].gsub(/ /, '')
+			linha[0] = linha[0].gsub(/ /, '')
+
+			#concatena as flexoes
+			linha[2].split(",").each do |meuOntoPt|
+				temp += "#{meuOntoPt};"
+			end
+
+			#concatena apolarizacao
+			temp += "#{linha[0]}"
+
+		end # if
+		
 		# dá push como array
-		arquivoSentiLexFlex.push(temp.split(";"))
-		controle += 1
+		arquivoPolarizacoes.push(temp.split(";"))
 
 	end #while
 
-	return arquivoSentiLexFlex
+	return arquivoPolarizacoes
 end #lerAqruivoPolarizacao()
 
 # frase = "Agência atribui a medida ao acordo entre a Embraer e a Boeing para criar uma joint venture. Presidente Bolsonaro autoriza fusão entre Embraer e Boeing Reprodução/JN A agência de classificação de risco Moody's colocou nesta sexta-feira (1) o rating Ba1 da Embraer em revisão para elevação. A Moody's atribui a medida ao acordo entre a Embraer e a Boeing para criar uma joint venture que vai concentrar as áreas de aviação comercial e serviços da Embraer. A Boeing controlará a parceria com uma fatia de 80%, enquanto a Embraer terá os 20% restantes. Segundo a agência, a alavancagem da Embraer cairá significativamente, enquanto a liquidez vai melhorar."
 # frase = "Preço caí médio da gasolina nas bombas cai pela 15ª vez seguida, diz ANP"
 frase = "tristeza enorme, essa que aconteceu em Brumadinho."
-sentiLexPT2 = lerAqruivoPolarizacao("/Users/paulinelymorgan/Dropbox/RailsServer/ft/public/SentiLex-flex-PT02.txt")
 
-# puts polarizarFrase(frase, sentiLexPT2)
+# sentiLexPT2
+file = lerAqruivoPolarizacao("/Users/paulinelymorgan/Dropbox/projetos/polarizacaoFrases/libs/SentiLex-flex-PT02.txt")
+puts polarizarFrase(frase, file)
+
+puts "-------------------------------------"
+
+# # ontoPT
+file = lerAqruivoPolarizacao("/Users/paulinelymorgan/Dropbox/projetos/polarizacaoFrases/libs/synsets_polarizados_ontopt06.txt", 2)
+puts "polarização: #{polarizarFrase(frase, file, 2)}" 
 
 
