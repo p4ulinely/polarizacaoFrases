@@ -302,7 +302,7 @@ frase = "tristeza enorme, essa que aconteceu em Brumadinho."
 file = lerAqruivoPolarizacao("/Users/paulinelymorgan/Dropbox/projetos/polarizacaoFrases/libs/SentiLex-flex-PT02.txt")
 puts polarizarFrase(frase, file)
 
-puts "-------------------------------------"
+puts "--------------------------------------"
 
 # # ontoPT
 file = lerAqruivoPolarizacao("/Users/paulinelymorgan/Dropbox/projetos/polarizacaoFrases/libs/synsets_polarizados_ontopt06.txt", 2)
