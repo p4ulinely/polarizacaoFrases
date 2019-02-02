@@ -2,6 +2,8 @@
 #funcao que polariza a frase
 private def polarizarFrase(frase, lemas, tipo=1)
 
+	meuRetorno = Array.new(4)
+
 	#tokenizar a frase num array de tokens
 	vetTokens = tokenizeFrase(frase)
 
@@ -57,13 +59,18 @@ private def polarizarFrase(frase, lemas, tipo=1)
 		end # if validos
 	end #each_index
 
+	# seta a quantindade de tokens polarizados para o retorno da funcao
+	meuRetorno[0] = tokensNeg
+	meuRetorno[1] = tokensNeu
+	meuRetorno[2] = tokensPos
+
 	#caso nenhum token seja encontrado
 	if tokensValidos < 1 
 		return nil
 	
 	#caso haja tokens validos
 	else
-		puts "neg: #{tokensNeg}, neu: #{tokensNeu}, pos: #{tokensPos}"
+		# puts "neg: #{tokensNeg}, neu: #{tokensNeu}, pos: #{tokensPos}"
 
 		# divisao = tokensValidos
 		divisao = tokensNeg + tokensNeu + tokensPos
@@ -74,7 +81,7 @@ private def polarizarFrase(frase, lemas, tipo=1)
 		pRotulos[1] = tokensNeu/divisao.to_f #probabilidade de ser neutro
 		pRotulos[2] = tokensPos/divisao.to_f #probabilidade de ser positivo
 
-		puts "probabilidades: #{pRotulos} | token validos: #{tokensValidos}"
+		# puts "probabilidades: #{pRotulos} | token validos: #{tokensValidos}"
 
 		#saber qnts probabilidades foram zero
 		qntZeros = 0
@@ -89,7 +96,8 @@ private def polarizarFrase(frase, lemas, tipo=1)
 			
 			#caso as três probabilidades sejam iguais
 			if pRotulos[0] == pRotulos[1] && pRotulos[1] == pRotulos[2]
-				return "neg,neu,pos"
+				meuRetorno[3] = "neg,neu,pos"
+				return meuRetorno
 			end
 
 			#procura qual a maior probabilidade
@@ -103,25 +111,31 @@ private def polarizarFrase(frase, lemas, tipo=1)
 			end #each_index
 
 			if idxMaior == 0
-				return "neg"
+				meuRetorno[3] = "neg"
+				return meuRetorno
 			elsif idxMaior == 1
-				return "neu"
+				meuRetorno[3] = "neu"
+				return meuRetorno
 			elsif idxMaior == 2
-				return "pos"
+				meuRetorno[3] = "pos"
+				return meuRetorno
 			end
 
 		#isso significa que so ha uma probabilidade zerada
 		elsif qntZeros == 1
 			if pRotulos[0] == pRotulos[1]
-				return "neg,neu"
+				meuRetorno[3] = "neg,neu"
+				return meuRetorno
 			end
 
 			if pRotulos[0] == pRotulos[2]
-				return "neg,pos"
+				meuRetorno[3] = "neg,pos"
+				return meuRetorno
 			end
 
 			if pRotulos[1] == pRotulos[2]
-				return "neu,pos"
+				meuRetorno[3] = "neu,pos"
+				return meuRetorno
 			end
 
 			#procura qual a maior probabilidade
@@ -135,11 +149,14 @@ private def polarizarFrase(frase, lemas, tipo=1)
 			end #each_index
 
 			if idxMaior == 0
-				return "neg"
+				meuRetorno[3] = "neg"
+				return meuRetorno
 			elsif idxMaior == 1
-				return "neu"
+				meuRetorno[3] = "neu"
+				return meuRetorno
 			elsif idxMaior == 2
-				return "pos"
+				meuRetorno[3] = "pos"
+				return meuRetorno
 			end
 
 		#isso significa que há duas probabilidades zeradas
@@ -156,11 +173,14 @@ private def polarizarFrase(frase, lemas, tipo=1)
 			end #each_index
 
 			if idxMaior == 0
-				return "neg"
+				meuRetorno[3] = "neg"
+				return meuRetorno
 			elsif idxMaior == 1
-				return "neu"
+				meuRetorno[3] = "neu"
+				return meuRetorno
 			elsif idxMaior == 2
-				return "pos"
+				meuRetorno[3] = "pos"
+				return meuRetorno
 			end
 		end #else qnt zeros
 	end #else tokens validos
@@ -299,13 +319,17 @@ end #lerAqruivoPolarizacao()
 frase = "tristeza enorme, essa que aconteceu em Brumadinho."
 
 # sentiLexPT2
-file = lerAqruivoPolarizacao("/Users/paulinelymorgan/Dropbox/projetos/polarizacaoFrases/libs/SentiLex-flex-PT02.txt")
-puts polarizarFrase(frase, file)
+file = lerAqruivoPolarizacao("libs/SentiLex-flex-PT02.txt")
+propabilidades = polarizarFrase(frase, file)
+print propabilidades
+puts "\npolarização - SentiLexPT2: #{propabilidades[3]}" 
 
 puts "--------------------------------------"
 
-# # ontoPT
-file = lerAqruivoPolarizacao("/Users/paulinelymorgan/Dropbox/projetos/polarizacaoFrases/libs/synsets_polarizados_ontopt06.txt", 2)
-puts "polarização: #{polarizarFrase(frase, file, 2)}" 
+# ontoPT
+file = lerAqruivoPolarizacao("libs/synsets_polarizados_ontopt06.txt", 2)
+propabilidades = polarizarFrase(frase, file, 2)
+print propabilidades
+puts "\npolarização - OntoPT: #{propabilidades[3]}" 
 
 
