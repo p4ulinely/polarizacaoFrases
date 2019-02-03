@@ -1,6 +1,5 @@
 # polarizacaoFrases
 
-Projeto que polariza frases em positivo, negativo ou neutro. De acordo com polarização dos lemas/tokens nas bibliotecas em PT:
+Projeto que tem como principal objetivo, extrair sentimentos de frases. Utilizando Processamento de Linguagem Natural (sigla em inglês NLP), efetuam análises sintáticas e semânticas, a fim de encontrar o maior número de lemas válidos da língua portuguesa. Por fim, os lemas válidos são comparados com bibliotecas de lemas, que possuem polarização de sentimentos. Há várias aplicações para o projeto, uma delas pode ser vista na plataforma Friendlytweets.
 
-- SentiLex-PT02
-- Polaridades_OntoPT: http://ontopt.dei.uc.pt
+- Friendlytweets: https://friendlytweets.herokuapp.com
