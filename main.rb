@@ -314,9 +314,9 @@ private def lerAqruivoPolarizacao(src, tipo=1)
 	return arquivoPolarizacoes
 end #lerAqruivoPolarizacao()
 
-# frase = "Agência atribui a medida ao acordo entre a Embraer e a Boeing para criar uma joint venture. Presidente Bolsonaro autoriza fusão entre Embraer e Boeing Reprodução/JN A agência de classificação de risco Moody's colocou nesta sexta-feira (1) o rating Ba1 da Embraer em revisão para elevação. A Moody's atribui a medida ao acordo entre a Embraer e a Boeing para criar uma joint venture que vai concentrar as áreas de aviação comercial e serviços da Embraer. A Boeing controlará a parceria com uma fatia de 80%, enquanto a Embraer terá os 20% restantes. Segundo a agência, a alavancagem da Embraer cairá significativamente, enquanto a liquidez vai melhorar."
+frase = "Agência atribui a medida ao acordo entre a Embraer e a Boeing para criar uma joint venture. Presidente Bolsonaro autoriza fusão entre Embraer e Boeing Reprodução/JN A agência de classificação de risco Moody's colocou nesta sexta-feira (1) o rating Ba1 da Embraer em revisão para elevação. A Moody's atribui a medida ao acordo entre a Embraer e a Boeing para criar uma joint venture que vai concentrar as áreas de aviação comercial e serviços da Embraer. A Boeing controlará a parceria com uma fatia de 80%, enquanto a Embraer terá os 20% restantes. Segundo a agência, a alavancagem da Embraer cairá significativamente, enquanto a liquidez vai melhorar."
 # frase = "Preço caí médio da gasolina nas bombas cai pela 15ª vez seguida, diz ANP"
-frase = "tristeza enorme, essa que aconteceu em Brumadinho."
+# frase = "tristeza enorme, essa que aconteceu em Brumadinho."
 
 # sentiLexPT2
 file = lerAqruivoPolarizacao("libs/SentiLex-flex-PT02.txt")
